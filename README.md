@@ -49,7 +49,40 @@ frontend/
   src/types.ts                         Contratos JSON validados con Zod
   tests/                               Búsqueda, errores y respuestas obsoletas
 examples/send_report.py                 Ejemplo de integración desde Python
+ai/                                     Pipeline YOLO + EasyOCR para enviar inspecciones
 ```
+
+## Integración del pipeline de IA
+
+El pipeline en `ai/` procesa una imagen con los modelos YOLO de daños y caracteres,
+lee el número de serie con EasyOCR y publica el resultado en `POST /api/reports`.
+Las etiquetas `Deframe` y `Minor-Dent` se normalizan a `dent`, que es la categoría
+compatible con el dashboard.
+
+Instala las dependencias Python en un entorno virtual y configura el cliente:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item ai/.env.example ai/.env
+```
+
+Los pesos (`damage_model.pt` y `text_model.pt`) y las imágenes de entrada no se
+versionan. Ejecuta una inspección indicando ambos modelos:
+
+```powershell
+python -m ai.infer `
+  --damage-model damage_model.pt `
+  --text-model text_model.pt `
+  --image entrada.jpg `
+  --output resultado_clasificado.jpg
+```
+
+El valor predeterminado del cliente apunta a `http://127.0.0.1:3001/api/reports`.
+Si `INGEST_API_KEY` está habilitada en `backend/.env`, configura el mismo valor en
+`REPORTS_API_KEY` o pásalo con `--api-key`. Para procesar sin enviar al backend,
+añade `--no-api`.
 
 ## Contrato de la API
 
