@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ContainerReport {
+  id            String         @id @default(uuid()) @db.Uuid
+  serial_number String         @db.VarChar(32)
+  timestamp     DateTime       @default(now()) @db.Timestamptz(3)
+  image_url     String?
+  damages       DamageDetail[]
+
+  @@index([timestamp])
+  @@index([serial_number, timestamp])
+}
+
+model DamageDetail {
+  id          String          @id @default(uuid()) @db.Uuid
+  report_id   String          @db.Uuid
+  report      ContainerReport @relation(fields: [report_id], references: [id], onDelete: Cascade)
+  damage_type String          @db.VarChar(32)
+  confidence  Float
+
+  @@index([report_id])
+  @@index([damage_type])
+}

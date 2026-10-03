@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: inspector
+      POSTGRES_PASSWORD: inspector_local
+      POSTGRES_DB: container_inspection
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - inspection_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U inspector -d container_inspection']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  inspection_data:
